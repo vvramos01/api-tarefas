@@ -1,4 +1,7 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
+const authMiddleware = require("./middleware/auth");
+
 const app = express();
 
 app.use(express.json());
