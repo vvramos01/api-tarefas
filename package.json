@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -20,10 +21,7 @@
   "homepage": "https://github.com/vvramos01/api-tarefas#readme",
   "dependencies": {
     "express": "^5.2.1",
+    "sqlite3": "^6.0.1",
     "uuid": "^13.0.0"
-  },
-  "scripts": {
-    "start": "node src/server.js",
-    "test": "jest"
   }
 }
