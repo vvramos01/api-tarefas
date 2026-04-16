@@ -1,7 +1,7 @@
 {
   "name": "api-tarefas",
   "version": "1.0.0",
-  "description": "",
+  "status": "",
   "main": "index.js",
   "scripts": {
     "start": "node src/server.js",

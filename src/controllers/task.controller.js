@@ -1,92 +1,69 @@
 const db = require("../database/db");
 
+// CRIAR TAREFA
 exports.create = (req, res) => {
-  const { title } = req.body;
-
+  const { title, status } = req.body;
+  
+  // Validação básica
   if (!title) {
-    return res.status(400).json({ error: "Título obrigatório" });
+    return res.status(400).json({ error: "Título é obrigatório" });
   }
 
+  // IMPORTANTE: req.userId vem do seu middleware de autenticação (auth.middleware.js)
+  const userId = req.userId; 
+
   db.run(
-    "INSERT INTO tasks (title, user_id) VALUES (?, ?)",
-    [title, req.userId],
+    "INSERT INTO tasks (title, status, user_id) VALUES (?, ?, ?)",
+    [title, status || "pendente", userId],
     function (err) {
       if (err) {
-        return res.status(500).json({ error: "Erro ao criar tarefa" });
+        console.error("Erro no INSERT:", err.message);
+        return res.status(500).json({ error: "Erro ao salvar tarefa. Verifique se a tabela tem a coluna user_id." });
       }
 
-      return res.status(201).json({ id: this.lastID });
+      res.status(201).json({
+        id: this.lastID,
+        title,
+        status: status || "pendente",
+        user_id: userId
+      });
     }
   );
 };
 
+// LISTAR TODAS AS TAREFAS
 exports.getAll = (req, res) => {
-  const { page = 1, limit = 5, completed, order = "tasks.id" } = req.query;
-
-  let query = `
-    SELECT tasks.*, users.name as user_name, users.email
-    FROM tasks
-    JOIN users ON tasks.user_id = users.id
-    WHERE tasks.user_id = ?
-  `;
-
-  let params = [req.userId];
-
-  if (completed !== undefined) {
-    query += " AND tasks.completed = ?";
-    params.push(completed);
-  }
-
-  query += ` ORDER BY ${order} LIMIT ? OFFSET ?`;
-  params.push(limit, (page - 1) * limit);
-
-  db.all(query, params, (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: "Erro ao buscar tarefas" });
-    }
-
-    return res.status(200).json(rows);
+  db.all("SELECT * FROM tasks", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
   });
 };
 
+// ATUALIZAR TAREFA
 exports.update = (req, res) => {
-  const { title, completed } = req.body;
-
-  if (title === undefined && completed === undefined) {
-    return res.status(400).json({ error: "Nada para atualizar" });
-  }
+  const { id } = req.params;
+  const { title, status } = req.body;
 
   db.run(
-    "UPDATE tasks SET title = COALESCE(?, title), completed = COALESCE(?, completed) WHERE id=? AND user_id=?",
-    [title, completed, req.params.id, req.userId],
+    "UPDATE tasks SET title = ?, status = ? WHERE id = ?",
+    [title, status, id],
     function (err) {
-      if (err) {
-        return res.status(500).json({ error: "Erro ao atualizar" });
-      }
+      if (err) return res.status(500).json({ error: err.message });
+      if (this.changes === 0) return res.status(404).json({ error: "Tarefa não encontrada" });
 
-      if (this.changes === 0) {
-        return res.status(404).json({ error: "Tarefa não encontrada" });
-      }
-
-      return res.status(200).json({ updated: this.changes });
+      res.json({ message: "Atualizado com sucesso" });
     }
   );
 };
 
-exports.delete = (req, res) => {
-  db.run(
-    "DELETE FROM tasks WHERE id=? AND user_id=?",
-    [req.params.id, req.userId],
-    function (err) {
-      if (err) {
-        return res.status(500).json({ error: "Erro ao deletar" });
-      }
+// DELETAR TAREFA
+exports.remove = (req, res) => {
+  const { id } = req.params;
 
-      if (this.changes === 0) {
-        return res.status(404).json({ error: "Tarefa não encontrada" });
-      }
+  db.run("DELETE FROM tasks WHERE id = ?", [id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    if (this.changes === 0) return res.status(404).json({ error: "Tarefa não encontrada" });
 
-      return res.status(200).json({ deleted: this.changes });
-    }
-  );
+    res.json({ message: "Deletado com sucesso" });
+  });
 };
