@@ -1,211 +1,153 @@
-# API REST de Tarefas com Node.js e SQLite
-
+## API REST de Tarefas com Node.js e SQLite
 ## Descrição
 
-Este projeto consiste no desenvolvimento de uma API REST completa utilizando Node.js, com integração a banco de dados SQLite. A aplicação permite o gerenciamento de tarefas associadas a usuários autenticados, implementando operações CRUD, autenticação via JWT, filtros, ordenação, paginação e relacionamentos entre entidades.
+Esta aplicação é uma API REST desenvolvida com Node.js e SQLite para gerenciamento de tarefas com autenticação de usuários.
 
-O objetivo do projeto é aplicar conceitos fundamentais de desenvolvimento backend, incluindo boas práticas de organização de código, tratamento de erros, uso adequado de status HTTP e persistência de dados.
+O sistema permite que usuários se registrem, façam login e gerenciem suas próprias tarefas de forma segura, utilizando autenticação baseada em token (JWT).
 
----
+O projeto foi estruturado seguindo boas práticas de organização em camadas, separando responsabilidades entre rotas, controllers, middlewares e banco de dados.
 
 ## Tecnologias Utilizadas
-
-* Node.js
-* Express
-* SQLite3
-* JSON Web Token (JWT)
-* BcryptJS
-* Jest (testes automatizados)
-
----
+Node.js
+Express (v5)
+SQLite3
+JSON Web Token (JWT)
+BcryptJS
+UUID (identificação de registros)
+Jest (testes automatizados)
 
 ## Funcionalidades
+## Autenticação
+Registro de usuários
+Login com validação de credenciais
+Geração de token JWT
+Proteção de rotas com middleware
 
-* Cadastro e autenticação de usuários
-* Geração de token JWT para acesso às rotas protegidas
-* CRUD completo de tarefas
-* Associação de tarefas a usuários (relacionamento)
-* Filtros por status de conclusão
-* Ordenação de resultados
-* Paginação de dados
-* Validações de entrada
-* Retorno de status HTTP apropriados
-* Testes automatizados básicos
+## Tarefas
+Criar tarefas
+Listar tarefas do usuário autenticado
+Atualizar tarefas
+Deletar tarefas
+Associação entre usuário e tarefas
 
----
+## Recursos adicionais
+Validação de dados de entrada
+Tratamento de erros
+Uso correto de status HTTP
+Persistência com SQLite
+Estrutura modular e organizada
 
 ## Estrutura do Projeto
-
-```
 src/
  ├── controllers/
+ │    ├── authController.js
+ │    └── task.controller.js
+ │
  ├── database/
+ │    └── db.js
+ │
  ├── middleware/
+ │    ├── auth.js
+ │    └── auth.middleware.js
+ │
  ├── routes/
+ │    ├── auth.routes.js
+ │    ├── task.routes.js
+ │    └── tarefas.routes.js
+ │
+ ├── data/
+ │    └── tarefas.js
+ │
  ├── app.js
  └── server.js
 
 tests/
-```
-
----
-
 ## Instalação e Execução
-
-### 1. Clonar o repositório
-
-```bash
+## 1. Clonar o repositório
 git clone https://github.com/vvramos01/api-tarefas.git
 cd api-tarefas
-```
-
-### 2. Instalar dependências
-
-```bash
+## 2. Instalar dependências
 npm install
-```
-
-### 3. Executar a aplicação
-
-```bash
+## 3. Executar o projeto
 npm start
-```
 
-A aplicação estará disponível em:
+A API estará disponível em:
 
-```
 http://localhost:3000
-```
-
----
-
 ## Autenticação
 
-A API utiliza autenticação baseada em JWT. Após o login, um token é gerado e deve ser enviado no header das requisições protegidas.
+A API utiliza JWT para proteger rotas.
 
-### Header necessário:
+Após o login, utilize o token no header:
 
-```
-Authorization: <token>
-```
-
----
-
+Authorization: Bearer <seu_token>
 ## Rotas da API
-
-### Autenticação
-
-#### Registro de usuário
-
+## Autenticação
+## Registrar usuário
 POST /auth/register
-
-```json
 {
   "name": "Usuario",
-  "email": "usuario@unifil.br",
+  "email": "usuario@email.com",
   "password": "123456"
 }
-```
-
-#### Login
-
+## Login
 POST /auth/login
-
-```json
 {
-  "email": "usuario@unifil.br",
+  "email": "usuario@email.com",
   "password": "123456"
 }
-```
+## Tarefas
 
----
+##  Todas as rotas abaixo exigem autenticação
 
-### Tarefas
-
-#### Listar tarefas
-
+## Listar tarefas
 GET /tasks
-
-Parâmetros de query:
-
-* page: número da página
-* limit: quantidade de registros por página
-* completed: filtrar por status (0 ou 1)
-* order: campo para ordenação
-
-Exemplo:
-
-```
-GET /tasks?page=1&limit=5&completed=0&order=id
-```
-
----
-
-#### Criar tarefa
-
+Criar tarefa
 POST /tasks
-
-```json
 {
   "title": "Estudar API"
 }
-```
-
----
-
-#### Atualizar tarefa
-
+## Atualizar tarefa
 PUT /tasks/:id
-
-```json
 {
   "title": "Atualizar tarefa",
-  "completed": 1
+  "completed": true
 }
-```
-
----
-
-#### Deletar tarefa
-
+## Deletar tarefa
 DELETE /tasks/:id
 
----
+## Banco de Dados
+Utiliza SQLite para persistência local
+Tabela de usuários (users)
+Tabela de tarefas (tasks)
+Relacionamento: 1 usuário → N tarefas
 
-## Relacionamentos
-
-A aplicação implementa relacionamento entre usuários e tarefas. Cada tarefa está associada a um usuário, e as consultas utilizam JOIN para retornar informações combinadas, como nome e e-mail do usuário responsável.
-
----
-
-## Testes Automatizados
-
-Para executar os testes:
-
-```bash
+## Testes
+Para rodar os testes:
 npm test
-```
 
----
+## Postman
+O projeto contém collections do Postman para facilitar os testes das rotas:
+API FINAL.postman_collection.json
+api-tarefas.postman_collection.json
 
 ## Deploy
+A aplicação pode ser publicada em serviços como:
+Render
+Railway
 
-A aplicação pode ser executada em ambiente de produção utilizando plataformas como Render ou Railway.
+## Melhorias Futuras
+Paginação e filtros nas tarefas
+Refresh token
+Validação com bibliotecas (ex: Joi ou Zod)
+Documentação com Swagger
+Dockerização
 
-Exemplo de deploy:
+## Considerações
+Este projeto demonstra na prática:
 
-```
-https://api-tarefas.onrender.com
-```
-
----
-
-## Collection do Postman
-
-A collection com exemplos de requisições está disponível no repositório, permitindo testar todas as rotas da API.
-
----
-
-## Considerações Finais
-
-Este projeto demonstra a implementação completa de uma API REST com autenticação, persistência de dados, organização em camadas e boas práticas de desenvolvimento backend, atendendo aos requisitos propostos para o trabalho final.
+Autenticação com JWT
+CRUD completo
+Organização backend profissional
+Integração com banco relacional leve
+Boas práticas em APIs REST
